@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<elygui>
+  <Module>
+    <Name>main</Name>
+    <Author>Fredy Ramirez</Author>
+    <Version>1.0.0</Version>
+  </Module>
+  <Forms>
+    <Form id="main_form">
+      <Title>Main Form</Title>
+      <Childs>
+        <VBox id="main_box" model="main">
+          <Childs>
+            <HBox id="box_shutdown" model="main">
+              <Height>150</Height>
+              <Childs>
+                <Button id="btn_shutdown" model="main">
+                  <Label>SHUTDOWN</Label>
+                </Button>
+              </Childs>
+            </HBox>
+          </Childs>
+        </VBox>
+      </Childs>
+    </Form>
+  </Forms>
+</elygui>

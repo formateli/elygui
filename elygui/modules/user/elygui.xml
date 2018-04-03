@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<elygui>
+  <Module>
+    <Name>user</Name>
+    <Author>Fredy Ramirez</Author>
+    <Version>1.0.0</Version>
+  </Module>
+  <Forms/>
+</elygui>

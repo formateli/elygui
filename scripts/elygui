@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+# This file is part of ElyGui project.
+# The COPYRIGHT file at the top level of this repository
+# contains the full copyright notices and license terms.
+
+import os
+import sys
+import argparse
+
+DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+
+try:
+    from elygui import VERSION, COPYRIGHT, LICENSE
+except ImportError:
+    print('Running uninstalled mode...')
+    DIR = os.path.normpath(os.path.join(DIRECTORY, '..', 'elygui'))
+    if os.path.isdir(DIR):
+        sys.path.insert(0, os.path.dirname(DIR))
+    DIR = os.path.normpath(os.path.join(DIRECTORY, '..', 'elygui_gtk3'))
+    if os.path.isdir(DIR):
+        sys.path.insert(0, os.path.dirname(DIR))
+    from elygui import VERSION, COPYRIGHT, LICENSE
+
+
+APPNAME = 'ElyGui'
+
+def get_info():
+    res = "\n{0} version {1}\nCopyright {2}\nLicensed under {3}".format(
+        APPNAME, VERSION, COPYRIGHT, LICENSE)
+    return res
+
+
+def run_app(args):
+    from elygui import ElyGui
+    from elygui_gtk3 import ElyGuiGtk3
+    
+    xml = os.path.join(DIRECTORY, 'elygui.xml')
+    if args.c:
+        xml = args.c
+    gui = ElyGui(xml)
+    app = ElyGuiGtk3(gui)
+
+
+def run():
+    parser = argparse.ArgumentParser(
+        description=APPNAME,
+        formatter_class=argparse.RawTextHelpFormatter)
+
+    help = "Configuration file. Default: elygui.xml."
+    parser.add_argument("-c", metavar="config", help=help)
+
+    parser.add_argument(
+        "-i", "--info", action='version', version=get_info(),
+        help='Show version, copyright and license.')
+
+    help = "Output verbosity. Default: 'WARNING'"
+    parser.add_argument(
+        "-v", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default="WARNING", help=help)
+
+    args = parser.parse_args()
+    run_app(args)
+
+
+if __name__ == "__main__":
+    run()

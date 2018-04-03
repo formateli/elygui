@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<elygui>
+  <Modules>
+    <Module>
+      <Name>main</Name>
+    </Module>
+    <Module>
+      <Name>user</Name>
+    </Module>
+    <Module>
+      <Name>clock</Name>
+    </Module>
+  </Modules>
+  <pjjob>
+    <Address>localhost</Address>
+    <Port>9009</Port>
+  </pjjob>
+</elygui>
