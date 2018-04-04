@@ -14,7 +14,7 @@
     <Form id="main.main_form">
       <Extends>
         <Extend>
-            <Path>Childs.VBox[main_box].HBox[box_shutdown].Childs.Button[btn_shutdown]</Path>
+            <Path>/main_box/box_shutdown/main.btn_shutdown</Path>
             <Action>place_before</Action>
             <Button id="btn_clock" model="clock">
               <Label>CLOCK</Label>

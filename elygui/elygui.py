@@ -87,52 +87,99 @@ class Container(object):
         for ch in childs:
             self._add_child(module_name, ch)
 
-    def _add_child(self, module_name, child):
+    def _add_child(self, module_name, child, place=-1):
         ctl_class = getattr(
             sys.modules[__name__],
             child._section_name)
-
-        ctl = ctl_class(module_name, child.model, child)
+        
+        model_name = None
+        if Xml2ClassObject.has_section(child, 'model'):
+            model_name = child.model
+        ctl = ctl_class(module_name, model_name, child)
         ctl.parent = self
-        self.controls.append(ctl)
+        if place == -1:
+            self.controls.append(ctl)
+        else:
+            self.controls.insert(place, ctl)
         self.childs[ctl.id] = ctl
 
         if Xml2ClassObject.has_section(child, 'Childs'):
             ctl.add_childs(
                 module_name, child.Childs.get_childs())
-        
+
+    def _remove_child(self, index):
+        child = self.controls[index]
+        self.childs.pop(child.id)
+        self.controls.remove(child)
+
 
 class Form(Container):
     def __init__(self, module_name, form_def):
         super(Form, self).__init__(module_name, form_def)
-        self.Title = form_def.Title.value
+        self.id = module_name + '.' + self.id
+        self.title = form_def.Title.value
         self.add_childs(
             module_name, form_def.Childs.get_childs())
 
     def extend(self, ext_def):
         action = ext_def.Action.value
+        ctl = self._resolve_path(ext_def.Path.value)
+        place_index = ctl.get_index()
 
         if action == 'remove':
-            pass
-        elif action == 'place_after':
-            pass
-        elif action == 'place_before':
-            pass
+            ctl.parent._remove_child(place_index)
+        elif action == 'place':
+            ctl._add_child(
+                self.module_name, ext_def.Controls.get_childs()[0])
+        elif action in ['place_after', 'place_before']:
+            if action == 'place_after':
+                place_index += 1
+            ctl.parent._add_child(
+                self.module_name, ext_def.Controls.get_childs()[0],
+                place=place_index)
         elif action == 'modify':
             pass
         else:
             raise Exception(
                 "'{0}' is not a valid Action.".format(action))
 
+    def _resolve_path(self, path):
+        els = path.split('/')
+        ctl = self
+        i = 1
+        while i < len(els):
+            ctl = self._get_els(els[i], path, ctl)
+            i += 1
+        return ctl
+
+    def _get_els(self, el, path, parent):
+        err = "Invalid '{0}' in path '{1}'.".format(el, path)
+        if not hasattr(parent, 'childs'):
+            raise Exception(
+                err + " Parent has no attribute 'childs'.")
+        if el not in parent.childs:
+            raise Exception(
+                err + " Not found in parent childs.")
+        return parent.childs[el]
+
 
 class Control(Container):
     def __init__(self, type_, module_name, model_name, control_def):
         super(Control, self).__init__(module_name, control_def)
+        if model_name is not None:
+            self.id = model_name + '.' + self.id
         self.type_ = type_
         self.model_name = model_name
 
     def get_full_name(self):
-        return self.module_name + '.' + self.model_name + '.' + self.id
+        return self.module_name + '.' + self.id
+
+    def get_index(self):
+        i = 0
+        for ctl in self.parent.controls:
+            if ctl.id == self.id:
+                return i
+            i += 1
 
 
 class HBox(Control):
