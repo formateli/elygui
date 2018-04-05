@@ -5,5 +5,124 @@
     <Author>Fredy Ramirez</Author>
     <Version>1.0.0</Version>
   </Module>
-  <Forms/>
+  <Forms>
+    <Form id="in_out">
+      <Title>IN / OUT</Title>
+      <Childs>
+        <VBox id="main_box">
+          <Height>150</Height>
+          <Width>500</Width>
+          <Childs>
+            <HBox id="box_buttons">
+              <Height>150</Height>
+              <Childs>
+                <Button id="btn_in" model="clock">
+                  <Label>IN</Label>
+                </Button>
+                <Button id="btn_out" model="clock">
+                  <Label>OUT</Label>
+                </Button>
+              </Childs>
+            </HBox>
+          </Childs>
+        </VBox>
+      </Childs>
+    </Form>
+    <Form id="credential">
+      <Title>Credentials</Title>
+      <Childs>
+        <VBox id="main_box">
+          <Width>500</Width>
+          <Childs>
+            <HBox id="box_entry">
+              <Height>50</Height>
+              <Childs>
+                <Entry id="entry_credential" model="user">
+                  <MaxLength>20</MaxLength>
+                </Entry>
+              </Childs>
+            </HBox>
+            <VBox id="box_numbers">
+              <Childs>
+                <HBox id="box_line_1">
+                  <Height>50</Height>
+                  <Childs>
+                    <Button id="btn_1" model="user">
+                      <Label>1</Label>
+                    </Button>
+                    <Button id="btn_2" model="user">
+                      <Label>2</Label>
+                    </Button>
+                    <Button id="btn_3" model="user">
+                      <Label>3</Label>
+                    </Button>
+                  </Childs>
+                </HBox>
+                <HBox id="box_line_2">
+                  <Height>50</Height>
+                  <Childs>
+                    <Button id="btn_4" model="user">
+                      <Label>4</Label>
+                    </Button>
+                    <Button id="btn_5" model="user">
+                      <Label>5</Label>
+                    </Button>
+                    <Button id="btn_6" model="user">
+                      <Label>6</Label>
+                    </Button>
+                  </Childs>
+                </HBox>
+                <HBox id="box_line_3">
+                  <Height>50</Height>
+                  <Childs>
+                    <Button id="btn_7" model="user">
+                      <Label>7</Label>
+                    </Button>
+                    <Button id="btn_8" model="user">
+                      <Label>8</Label>
+                    </Button>
+                    <Button id="btn_9" model="user">
+                      <Label>9</Label>
+                    </Button>
+                  </Childs>
+                </HBox>
+                <HBox id="box_line_4">
+                  <Height>50</Height>
+                  <Childs>
+                    <Button id="btn_0" model="user">
+                      <Label>0</Label>
+                    </Button>
+                  </Childs>
+                </HBox>
+              </Childs>
+            </VBox>
+            <HBox id="box_buttons">
+              <Height>150</Height>
+              <Childs>
+                <Button id="btn_credential_ok" model="user">
+                  <Label>OK</Label>
+                </Button>
+                <Button id="btn_credential_close" model="user">
+                  <Label>CLOSE</Label>
+                </Button>
+              </Childs>
+            </HBox>
+          </Childs>
+        </VBox>
+      </Childs>
+    </Form>
+    <Form id="main.main_form">
+      <Extends>
+        <Extend>
+            <Path>/main_box/box_shutdown/main.btn_shutdown</Path>
+            <Action>place_before</Action>
+            <Controls>
+              <Button id="btn_clock" model="clock">
+                <Label>CLOCK</Label>
+              </Button>
+            </Controls>
+        </Extend>
+      </Extends>
+    </Form>
+  </Forms>
 </elygui>

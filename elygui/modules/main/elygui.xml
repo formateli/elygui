@@ -9,9 +9,11 @@
     <Form id="main_form">
       <Title>Main Form</Title>
       <Childs>
-        <VBox id="main_box" model="main">
+        <VBox id="main_box">
+          <Height>150</Height>
+          <Width>500</Width>
           <Childs>
-            <HBox id="box_shutdown" model="main">
+            <HBox id="box_shutdown">
               <Height>150</Height>
               <Childs>
                 <Button id="btn_shutdown" model="main">

@@ -7,9 +7,6 @@
     <Module>
       <Name>user</Name>
     </Module>
-    <Module>
-      <Name>clock</Name>
-    </Module>
   </Modules>
   <pjjob>
     <Address>localhost</Address>

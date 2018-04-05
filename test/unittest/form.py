@@ -77,6 +77,32 @@ class ElyGuiFormTest(unittest.TestCase):
                   </Extend>
                 </Extends>
               </Form>
+              <Form id="main.main_form">
+                <Extends>
+                  <Extend>
+                      <Path>/main_box/box_shutdown/clock3.btn_clock_3</Path>
+                      <Action>replace</Action>
+                      <Controls>
+                        <Button id="btn_clock_3r" model="clock3r">
+                          <Label>CLOCK 3 REPLACED</Label>
+                        </Button>
+                      </Controls>
+                  </Extend>
+                </Extends>
+              </Form>
+              <Form id="main.main_form">
+                <Extends>
+                  <Extend>
+                      <Path>/main_box/box_shutdown/clock3r.btn_clock_3r</Path>
+                      <Action>modify</Action>
+                      <Controls>
+                        <Button id="btn_clock_3r" model="clock3r">
+                          <Label>CLOCK 3 REPLACED MODIFIED</Label>
+                        </Button>
+                      </Controls>
+                  </Extend>
+                </Extends>
+              </Form>
             </Forms>"""
 
         forms = Xml2ClassObject(string_xml)
@@ -129,4 +155,17 @@ class ElyGuiFormTest(unittest.TestCase):
         self.assertEqual(len(parent.controls), 3)
         self.assertEqual('main.btn_shutdown' not in parent.childs, True)
 
-        # TODO modify
+        # replace
+        form_def = forms.get_childs('Form')[5]
+        frm.extend(form_def.Extends.get_childs('Extend')[0])
+        parent = frm.childs['main_box'].childs['box_shutdown']
+        self.assertEqual(len(parent.controls), 3)
+        self.assertEqual('clock3.btn_clock_3' not in parent.childs, True)
+        ctl = frm.childs['main_box'].childs['box_shutdown'].childs['clock3r.btn_clock_3r']
+        self.assertEqual(ctl.get_full_name(), 'dummy.clock3r.btn_clock_3r')        
+
+        # modify
+        form_def = forms.get_childs('Form')[6]
+        frm.extend(form_def.Extends.get_childs('Extend')[0])
+        ctl = frm.childs['main_box'].childs['box_shutdown'].childs['clock3r.btn_clock_3r']
+        self.assertEqual(ctl.label, 'CLOCK 3 REPLACED MODIFIED')

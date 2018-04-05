@@ -9,16 +9,19 @@ from gi.repository import Gtk
 
 class ElyGuiGtk3(object):
     def __init__(self, gui_def):
-        win = MainWindow(gui_def)
+        win = WindowForm(gui_def, 'main.main_form')
+        win.show_all()
         Gtk.main()
 
 
-class MainWindow(Gtk.Window):
-    def __init__(self, gui_def):
+class WindowForm(Gtk.Window):
+    def __init__(self, gui_def, form_id):
         self.gui_def = gui_def
-        frm = gui_def.get_form('main', 'main_form')
+        frm = gui_def.get_form(form_id)
 
-        #TODO if not frm raise error
+        if frm is None:
+            raise Exception("Form '{0}' not found.".format(
+                form_id))
 
         Gtk.Window.__init__(self, title=frm.title)
 
@@ -26,17 +29,14 @@ class MainWindow(Gtk.Window):
             wg = self.get_widget(ctl)
             self.add(wg)
 
-        self.connect("delete-event", Gtk.main_quit)
-        self.show_all()
+        self.set_decorated(False)
+        self.set_destroy_with_parent(True)
+        # TODO in config: self.set_keep_above(True)
+        self.set_resizable(False)
+        self.set_modal(True)
 
-    def on_button1_clicked(self, widget):
-        print("Hello")
-
-    def on_button2_clicked(self, widget):
-        print("Goodbye")
-
-    def on_button3_clicked(self, widget):
-        Gtk.main_quit()
+        #self.connect("delete-event", Gtk.main_quit)
+        #self.show_all()
 
     def get_widget(self, wg_def):
         wg = None
@@ -52,10 +52,17 @@ class MainWindow(Gtk.Window):
         if wg_def.type_ == 'Button':
             wg = Gtk.Button(label=wg_def.label)
             wg.connect("clicked", self.on_button_clicked)
+        if wg_def.type_ == 'Entry':
+            wg = Gtk.Entry()
+            #wg.connect("clicked", self.on_button_clicked)
 
         if wg:
             wg.set_property('name',
                 wg_def.get_full_name())
+            if wg_def.height is not None:
+                wg.set_property("height-request", float(wg_def.height))
+            if wg_def.width is not None:
+                wg.set_property("width-request", float(wg_def.width))
 
         return wg
 
@@ -64,13 +71,23 @@ class MainWindow(Gtk.Window):
             widget.get_property('name'))
 
         cls = self.gui_def.get_model_class(model)
+        if cls is None:
+            raise Exception(
+                "Class for model '{0}' not found.".format(model))
         func = getattr(cls, 'button_' + name + '_clicked')
         res = func(self.gui_def._context)
 
-        if res == 'SHUTDOWN':
+        if res['next'][0] == 'SHUTDOWN':
             Gtk.main_quit()
+        if res['next'][0] == 'OPEN_FORM':
+            frm = WindowForm(self.gui_def, res['next'][1])
+            frm.set_transient_for(self)
+            frm.show_all()
+        if res['next'][0] == 'CLOSE_FORM':
+            self.close()
 
-    def defrag_name(self, name_to_defrag):
+    @staticmethod
+    def defrag_name(name_to_defrag):
         names = name_to_defrag.split('.')
         i = 0
         module = None

@@ -2,17 +2,24 @@
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
 
-from elygui.model import Model, String, One2Many
+from elygui.model import Model
+
+__all__ = ['User']
 
 
 class User(Model):
-    __model__ = 'user.user'
+    __model__ = 'user'
 
-    name = String()
-    groups = One2Many('user.group')
+    def initialize(self, context):
+        super(User, self).initialize(context)
+        context['model'] = {'user': {'credential': False}}
 
+    def button_btn_credential_close_clicked(self, context):
+        context['model']['user']['credential'] = False
+        context['next'] = ['CLOSE_FORM']
+        return context
 
-class Group(Model):
-    __model__ = 'user.group'
-
-    name = String()
+    def button_btn_credential_ok_clicked(self, context):
+        context['model']['user']['credential'] = True
+        context['next'] = ['CLOSE_FORM']
+        return context

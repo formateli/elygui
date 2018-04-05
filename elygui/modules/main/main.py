@@ -15,5 +15,6 @@ class Main(Model):
         print("Initializing 'Main'")
 
     def button_btn_shutdown_clicked(self, context):
-        return "SHUTDOWN"
+        context['next'] = ['SHUTDOWN']
+        return context
 

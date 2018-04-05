@@ -18,9 +18,9 @@ class ElyGui(object):
         if not self.config:
             raise Exception("ElyGui: No config loaded.")
 
-        self._forms={}
-        self._context={}
-        self._model_classes={}
+        self._forms = {}
+        self._context = {}
+        self._model_classes = {}
 
         module_path = os.path.join(DIRECTORY, 'modules')
         for m in self.config.Modules.get_childs('Module'):
@@ -38,9 +38,9 @@ class ElyGui(object):
         if model in self._model_classes:
             return self._model_classes[model]
 
-    def get_form(self, module, form_name):
-        n = "{0}.{1}".format(module, form_name)
-        return self._forms[n]
+    def get_form(self, form_id):
+        if form_id in self._forms:
+            return self._forms[form_id]
 
     def _load_module(self, module_path, m):
         print("Loading module {0}".format(m.Name.value))
@@ -112,12 +112,32 @@ class Container(object):
         self.childs.pop(child.id)
         self.controls.remove(child)
 
+    def modify(self, ctl_def):
+        self.id = self._get_field_value(ctl_def, 'id', self.id)
+        self.model_name = self._get_field_value(
+            ctl_def, 'model', self.model_name)
+        self.label = self._get_field_value(
+            ctl_def, 'Label', self.label)
+
+    @staticmethod
+    def _get_field_value(ctl_def, name, default=None):
+        try:
+            if not hasattr(ctl_def, name):
+                return default
+            val = getattr(ctl_def, name)
+            if hasattr(val, 'value'):
+                return getattr(val, 'value')
+            else:
+                return val
+        except:
+            return default
+
 
 class Form(Container):
     def __init__(self, module_name, form_def):
         super(Form, self).__init__(module_name, form_def)
         self.id = module_name + '.' + self.id
-        self.title = form_def.Title.value
+        self.title = self._get_field_value(form_def, 'Title', 'NO TITLE')
         self.add_childs(
             module_name, form_def.Childs.get_childs())
 
@@ -137,8 +157,13 @@ class Form(Container):
             ctl.parent._add_child(
                 self.module_name, ext_def.Controls.get_childs()[0],
                 place=place_index)
+        elif action == 'replace':
+            ctl.parent._add_child(
+                self.module_name, ext_def.Controls.get_childs()[0],
+                place=place_index + 1)
+            ctl.parent._remove_child(place_index)
         elif action == 'modify':
-            pass
+            ctl.modify(ext_def.Controls.get_childs()[0])
         else:
             raise Exception(
                 "'{0}' is not a valid Action.".format(action))
@@ -170,6 +195,8 @@ class Control(Container):
             self.id = model_name + '.' + self.id
         self.type_ = type_
         self.model_name = model_name
+        self.height = self._get_field_value(control_def, 'Height') 
+        self.width = self._get_field_value(control_def, 'Width') 
 
     def get_full_name(self):
         return self.module_name + '.' + self.id
@@ -195,4 +222,10 @@ class VBox(Control):
 class Button(Control):
     def __init__(self, module_name, model, control_def):
         super(Button, self).__init__('Button', module_name, model, control_def)
-        self.label = control_def.Label.value
+        self.label = self._get_field_value(control_def, 'Label')
+
+
+class Entry(Control):
+    def __init__(self, module_name, model, control_def):
+        super(Entry, self).__init__('Entry', module_name, model, control_def)
+        self.label = self._get_field_value(control_def, 'Label')
