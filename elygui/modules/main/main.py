@@ -12,7 +12,8 @@ class Main(Model):
 
     def initialize(self, context):
         super(Main, self).initialize(context)
-        print("Initializing 'Main'")
+        context['model'] = {}
+        context['next'] = None
 
     def button_btn_shutdown_clicked(self, context):
         context['next'] = ['SHUTDOWN']

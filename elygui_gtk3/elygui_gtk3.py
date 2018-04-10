@@ -4,19 +4,47 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 
 class ElyGuiGtk3(object):
     def __init__(self, gui_def):
+
+        #css = ".user_user_entry_credential{color: red; font-size: 20pt}"
+        css = self._get_css(gui_def)
+        print(css)
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_data(css.encode('utf8'))
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
         win = WindowForm(gui_def, 'main.main_form')
         win.show_all()
         Gtk.main()
+
+    def _get_css(self, gui_def):
+        css = ''
+        for st in gui_def.styles_list:
+            c = '.' + st.name + '{'
+            c += self._get_css_pair('color', 'font_color', st)
+            c += self._get_css_pair('font-size', 'font_size', st)
+            css += c + '}'
+        return css
+
+    def _get_css_pair(self, css_name, st_name, st):
+        val = getattr(st, st_name)
+        if val is None:
+            return ''
+        return ' ' + css_name + ': ' + val + ';'
 
 
 class WindowForm(Gtk.Window):
     def __init__(self, gui_def, form_id):
         self.gui_def = gui_def
+        self.controls = {}
+        
         frm = gui_def.get_form(form_id)
 
         if frm is None:
@@ -27,6 +55,7 @@ class WindowForm(Gtk.Window):
 
         for ctl in frm.controls:
             wg = self.get_widget(ctl)
+            self.controls[ctl.id] = wg
             self.add(wg)
 
         self.set_decorated(False)
@@ -54,7 +83,9 @@ class WindowForm(Gtk.Window):
             wg.connect("clicked", self.on_button_clicked)
         if wg_def.type_ == 'Entry':
             wg = Gtk.Entry()
-            #wg.connect("clicked", self.on_button_clicked)
+            ctx = wg.get_style_context()
+            if wg_def.style:
+                ctx.add_class(wg_def.style)
 
         if wg:
             wg.set_property('name',
@@ -63,6 +94,7 @@ class WindowForm(Gtk.Window):
                 wg.set_property("height-request", float(wg_def.height))
             if wg_def.width is not None:
                 wg.set_property("width-request", float(wg_def.width))
+            self.controls[wg_def.id] = wg
 
         return wg
 
@@ -83,8 +115,16 @@ class WindowForm(Gtk.Window):
             frm = WindowForm(self.gui_def, res['next'][1])
             frm.set_transient_for(self)
             frm.show_all()
+        if res['next'][0] == 'CONTROL':
+            ctl = self.controls[res['next'][1]]
+            if res['next'][2] == 'append_text':
+                txt = ctl.get_text()
+                txt += res['next'][3]
+                ctl.set_text(txt)
+
         if res['next'][0] == 'CLOSE_FORM':
             self.close()
+        
 
     @staticmethod
     def defrag_name(name_to_defrag):

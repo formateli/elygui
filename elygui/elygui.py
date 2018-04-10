@@ -21,12 +21,15 @@ class ElyGui(object):
         self._forms = {}
         self._context = {}
         self._model_classes = {}
+        
+        self.styles = {}
+        self.styles_list = []
 
         module_path = os.path.join(DIRECTORY, 'modules')
         for m in self.config.Modules.get_childs('Module'):
             self._load_module(module_path, m)
 
-        for model, _ in Model._ext.items():
+        for model in Model._ext_list:
             if model is not None:
                 cls = Model.get(model)
                 if cls:
@@ -53,6 +56,10 @@ class ElyGui(object):
 
         loaded_module = import_module('elygui.modules.' + m.Name.value)
 
+        if cfg.has_section(cfg, 'Styles') and \
+                cfg.has_section(cfg.Styles, 'Style'):
+            self._get_styles(cfg.Styles)
+
         if cfg.has_section(cfg, 'Forms') and \
                 cfg.has_section(cfg.Forms, 'Form'):
             for f in cfg.Forms.get_childs('Form'):
@@ -71,6 +78,16 @@ class ElyGui(object):
                             form_name))
                     form = Form(m.Name.value, f)
                     self._forms[m.Name.value + '.' + f.id] = form
+
+    def _get_styles(self, styles):
+        for st in styles.get_childs('Style'):        
+            if st.Name.value in self.styles:
+                style = self.styles[st.Name.value]
+                style.set_values(st)
+            else:
+                style = Style(st)
+                self.styles[st.Name.value] = style
+                self.styles_list.append(style)
 
 
 class Container(object):
@@ -188,6 +205,25 @@ class Form(Container):
         return parent.childs[el]
 
 
+class Style(object):
+    def __init__(self, style_def):
+        self.set_values(style_def)
+
+    def set_values(self, style_def):
+        self._get_style(style_def, 'Name', 'name')
+        self._get_style(style_def, 'Color', 'font_color')
+        self._get_style(style_def, 'FontSize', 'font_size')
+
+    def _get_style(self, style, name, att_name):
+        val = None
+        if Xml2ClassObject.has_section(style, name):
+            val = getattr(style, name).value
+        if val is not None:
+            setattr(self, att_name, val)
+        if not hasattr(self, att_name):
+            setattr(self, att_name, None)
+
+
 class Control(Container):
     def __init__(self, type_, module_name, model_name, control_def):
         super(Control, self).__init__(module_name, control_def)
@@ -195,6 +231,7 @@ class Control(Container):
             self.id = model_name + '.' + self.id
         self.type_ = type_
         self.model_name = model_name
+        self.style = self._get_field_value(control_def, 'Style') 
         self.height = self._get_field_value(control_def, 'Height') 
         self.width = self._get_field_value(control_def, 'Width') 
 
@@ -207,7 +244,7 @@ class Control(Container):
             if ctl.id == self.id:
                 return i
             i += 1
-
+    
 
 class HBox(Control):
     def __init__(self, module_name, model, control_def):

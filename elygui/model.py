@@ -7,6 +7,7 @@ from six import add_metaclass
 
 class _Model(type):
     _ext = {}
+    _ext_list = []
 
     def __new__(meta, name, bases, class_dict):
         print ("Registering model class: {0}".format(name))
@@ -16,7 +17,7 @@ class _Model(type):
         #print ("Bases: {0}".format(bases))
         #print ("ClassDict: {0}".format(class_dict))
 
-        if not "__model__" in class_dict:
+        if not '__model__' in class_dict:
             raise Exception(
                 "'__model__' attribute must be set for Model derived classes. Class '{0}'".format(
                 name))
@@ -30,6 +31,17 @@ class _Model(type):
         setattr(new_cls, '__model__', class_dict['__model__'])
 
         _Model._ext[class_dict['__model__']] = new_cls
+        i = 1
+        if _Model._ext_list:
+            for c in _Model._ext_list:
+                if c == class_dict['__model__']:
+                    break
+                i += 1
+                if i > len(_Model._ext_list):
+                    _Model._ext_list.append(class_dict['__model__'])
+                    break
+        else:
+            _Model._ext_list.append(class_dict['__model__'])
 
         return new_cls
 
@@ -39,7 +51,6 @@ class _Model(type):
         #print (" Getting " + model_name)
         if not model_name in cls._ext:
             cls._ext[model_name] = Model
-            return cls._ext[model_name]
         return cls._ext[model_name]
 
 

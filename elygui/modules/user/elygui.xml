@@ -5,6 +5,14 @@
     <Author>Fredy Ramirez</Author>
     <Version>1.0.0</Version>
   </Module>
+  <Styles>
+    <Style>
+      <Name>entry</Name>
+      <Color>blue</Color>
+      <FontSize>20pt</FontSize>
+      <FontWeight>bold</FontWeight>
+    </Style>
+  </Styles>
   <Forms>
     <Form id="in_out">
       <Title>IN / OUT</Title>
@@ -39,6 +47,8 @@
               <Childs>
                 <Entry id="entry_credential" model="user">
                   <MaxLength>20</MaxLength>
+                  <InvisibleChar>*</InvisibleChar>
+                  <Style>entry</Style>
                 </Entry>
               </Childs>
             </HBox>
