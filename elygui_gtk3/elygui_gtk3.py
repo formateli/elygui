@@ -10,9 +10,7 @@ from gi.repository import Gtk, Gdk
 class ElyGuiGtk3(object):
     def __init__(self, gui_def):
 
-        #css = ".user_user_entry_credential{color: red; font-size: 20pt}"
         css = self._get_css(gui_def)
-        print(css)
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css.encode('utf8'))
         Gtk.StyleContext.add_provider_for_screen(
@@ -83,13 +81,15 @@ class WindowForm(Gtk.Window):
             wg.connect("clicked", self.on_button_clicked)
         if wg_def.type_ == 'Entry':
             wg = Gtk.Entry()
-            ctx = wg.get_style_context()
-            if wg_def.style:
-                ctx.add_class(wg_def.style)
 
         if wg:
             wg.set_property('name',
                 wg_def.get_full_name())
+
+            ctx = wg.get_style_context()
+            if wg_def.style:
+                ctx.add_class(wg_def.style)
+
             if wg_def.height is not None:
                 wg.set_property("height-request", float(wg_def.height))
             if wg_def.width is not None:
@@ -109,21 +109,23 @@ class WindowForm(Gtk.Window):
         func = getattr(cls, 'button_' + name + '_clicked')
         res = func(self.gui_def._context)
 
-        if res['next'][0] == 'SHUTDOWN':
-            Gtk.main_quit()
-        if res['next'][0] == 'OPEN_FORM':
-            frm = WindowForm(self.gui_def, res['next'][1])
-            frm.set_transient_for(self)
-            frm.show_all()
-        if res['next'][0] == 'CONTROL':
-            ctl = self.controls[res['next'][1]]
-            if res['next'][2] == 'append_text':
-                txt = ctl.get_text()
-                txt += res['next'][3]
-                ctl.set_text(txt)
-
-        if res['next'][0] == 'CLOSE_FORM':
-            self.close()
+        for r in res['next']:
+            if r[0] == 'SHUTDOWN':
+                Gtk.main_quit()
+            if r[0] == 'OPEN_FORM':
+                frm = WindowForm(self.gui_def, r[1])
+                frm.set_transient_for(self)
+                frm.show_all()
+            if r[0] == 'CONTROL':
+                ctl = self.controls[r[1]]
+                if r[2] == 'append_text':
+                    txt = ctl.get_text()
+                    txt += r[3]
+                    ctl.set_text(txt)
+            if r[0] == 'HIDE_FORM':
+                self.hide()
+            if r[0] == 'CLOSE_FORM':
+                self.close()
         
 
     @staticmethod

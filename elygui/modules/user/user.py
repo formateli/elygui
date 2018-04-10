@@ -20,49 +20,53 @@ class User(Model):
 
     def button_btn_credential_close_clicked(self, context):
         self.credential = False
-        context['next'] = ['CLOSE_FORM']
+        context['next'] = [['CLOSE_FORM']]
         return context
 
     def button_btn_credential_ok_clicked(self, context):
         self.credential = True
-        context['next'] = ['CLOSE_FORM']
+        calling = context['required_by'][0]
+        context['next'] = [
+                ['HIDE_FORM'],
+                ['OPEN_FORM', calling],
+            ]
         return context
 
     def button_btn_0_clicked(self, context):
-        return self._button_btn_pad_number_clicked(0, context)
+        return self._pad_number_clicked(0, context)
 
     def button_btn_1_clicked(self, context):
-        return self._button_btn_pad_number_clicked(1, context)
+        return self._pad_number_clicked(1, context)
 
     def button_btn_2_clicked(self, context):
-        return self._button_btn_pad_number_clicked(2, context)
+        return self._pad_number_clicked(2, context)
 
     def button_btn_3_clicked(self, context):
-        return self._button_btn_pad_number_clicked(3, context)
+        return self._pad_number_clicked(3, context)
 
     def button_btn_4_clicked(self, context):
-        return self._button_btn_pad_number_clicked(4, context)
+        return self._pad_number_clicked(4, context)
 
     def button_btn_5_clicked(self, context):
-        return self._button_btn_pad_number_clicked(5, context)
+        return self._pad_number_clicked(5, context)
 
     def button_btn_6_clicked(self, context):
-        return self._button_btn_pad_number_clicked(6, context)
+        return self._pad_number_clicked(6, context)
         
     def button_btn_7_clicked(self, context):
-        return self._button_btn_pad_number_clicked(7, context)
+        return self._pad_number_clicked(7, context)
 
     def button_btn_8_clicked(self, context):
-        return self._button_btn_pad_number_clicked(8, context)
+        return self._pad_number_clicked(8, context)
 
     def button_btn_9_clicked(self, context):
-        return self._button_btn_pad_number_clicked(9, context)
+        return self._pad_number_clicked(9, context)
 
-    def _button_btn_pad_number_clicked(self, number, context):
-        context['next'] = [
+    def _pad_number_clicked(self, number, context):
+        context['next'] = [[
                 'CONTROL', 
                 'user.entry_credential', 
                 'append_text',
                 str(number)
-            ]
+            ]]
         return context

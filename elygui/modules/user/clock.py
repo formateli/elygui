@@ -17,18 +17,19 @@ class Clock(Model):
     def button_btn_clock_clicked(self, context):
         ok = context['model']['user'].credential
         if ok:
-            context['next'] = ['OPEN_FORM', 'user.in_out']
+            context['next'] = [['OPEN_FORM', 'user.in_out']]
         else:
-            context['next'] = ['OPEN_FORM', 'user.credential']
+            context['next'] = [['OPEN_FORM', 'user.credential']]
+            context['required_by'] = ['user.in_out']
         return context
 
     def button_btn_in_clicked(self, context):
         context['model']['user'].credential = False
-        context['next'] = ['CLOSE_FORM']
+        context['next'] = [['CLOSE_FORM']]
         return context
 
     def button_btn_out_clicked(self, context):
         context['model']['user'].credential = False
-        context['next'] = ['CLOSE_FORM']
+        context['next'] = [['CLOSE_FORM']]
         return context
 
