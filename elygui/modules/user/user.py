@@ -13,22 +13,25 @@ class User(Model):
     def initialize(self, context):
         super(User, self).initialize(context)
 
-        self.name = ''
         self.credential = False
 
         context['model']['user'] = self
-
-    def button_btn_credential_close_clicked(self, context):
-        self.credential = False
-        context['next'] = [['CLOSE_FORM']]
-        return context
 
     def button_btn_credential_ok_clicked(self, context):
         self.credential = True
         calling = context['required_by'][0]
         context['next'] = [
+                self._clear_entry_credential(),
                 ['HIDE_FORM'],
                 ['OPEN_FORM', calling],
+            ]
+        return context
+
+    def button_btn_credential_close_clicked(self, context):
+        self.credential = False
+        context['next'] = [
+                self._clear_entry_credential(),
+                ['HIDE_FORM']
             ]
         return context
 
@@ -70,3 +73,10 @@ class User(Model):
                 str(number)
             ]]
         return context
+
+    def _clear_entry_credential(self):
+        return [
+            'CONTROL', 
+            'user.entry_credential', 
+            'clear_text',
+        ]

@@ -16,6 +16,7 @@ class Clock(Model):
 
     def button_btn_clock_clicked(self, context):
         ok = context['model']['user'].credential
+        print(ok)
         if ok:
             context['next'] = [['OPEN_FORM', 'user.in_out']]
         else:

@@ -39,10 +39,14 @@ class ElyGuiGtk3(object):
 
 
 class WindowForm(Gtk.Window):
+
+    hide_forms = {}
+
     def __init__(self, gui_def, form_id):
         self.gui_def = gui_def
         self.controls = {}
-        
+        self.id = form_id
+
         frm = gui_def.get_form(form_id)
 
         if frm is None:
@@ -113,7 +117,10 @@ class WindowForm(Gtk.Window):
             if r[0] == 'SHUTDOWN':
                 Gtk.main_quit()
             if r[0] == 'OPEN_FORM':
-                frm = WindowForm(self.gui_def, r[1])
+                if r[1] in self.hide_forms:
+                    frm = self.hide_forms[r[1]]
+                else:
+                    frm = WindowForm(self.gui_def, r[1])
                 frm.set_transient_for(self)
                 frm.show_all()
             if r[0] == 'CONTROL':
@@ -122,7 +129,10 @@ class WindowForm(Gtk.Window):
                     txt = ctl.get_text()
                     txt += r[3]
                     ctl.set_text(txt)
+                elif r[2] == 'clear_text':
+                    ctl.set_text('')
             if r[0] == 'HIDE_FORM':
+                self.hide_forms[self.id] = self
                 self.hide()
             if r[0] == 'CLOSE_FORM':
                 self.close()

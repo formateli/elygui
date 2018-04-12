@@ -99,11 +99,11 @@
                 <HBox id="box_line_4">
                   <Height>50</Height>
                   <Childs>
-                    <Button id="btn_0" model="user">
-                      <Label>0</Label>
-                    </Button>
                     <Button id="btn_clear" model="user">
                       <Label>CLEAR</Label>
+                    </Button>
+                    <Button id="btn_0" model="user">
+                      <Label>0</Label>
                     </Button>
                     <Button id="btn_clear_all" model="user">
                       <Label>CLEAR ALL</Label>
