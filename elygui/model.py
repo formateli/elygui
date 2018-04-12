@@ -59,7 +59,40 @@ class Model(object):
     __model__ = None
 
     def __init__(self, context):
+        self._fields = {}
         self.initialize(context)
 
     def initialize(self, context):
         pass
+
+    def field(self, name, default):
+        if name in self._fields:
+            f = self._fields[name]
+            f.default = default
+            f.reset()
+        else:
+            f = Field(name, default)
+            self._fields[name] = f
+
+    def reset_fields(self):
+        for name, f in self._fields.items():
+            f.reset()
+            if hasattr(self, name):
+                setattr(self, name, f.default)
+
+    def __getattr__(self, name):
+        if name not in self._fields:
+            raise AttributeError(
+                "Field '{0}' not found in model '{1}'.".format(
+                    name, self.__model__))
+        return self._fields[name].value
+
+
+class Field(object):
+    def __init__(self, name, default):
+        self.name = name
+        self.default = default
+        self.value = default
+
+    def reset(self):
+        self.value = self.default

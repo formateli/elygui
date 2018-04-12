@@ -2,7 +2,7 @@
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
 
-from elygui.model import Model
+from elygui.model import Model, Field
 import unittest
 
 
@@ -19,6 +19,11 @@ class A(Model):
 class A1(Model):
     __model__ = 'test.a'
 
+    def initialize(self, context):
+        super(A1, self).initialize(context)
+        self.field('field_a', 'A')
+        self.field('field_b', True)
+
     def value(self):
         v = super(A1, self).value()
         return v + " + Class A1"
@@ -26,6 +31,11 @@ class A1(Model):
 
 class A2(Model):
     __model__ = 'test.a'
+
+    def initialize(self, context):
+        super(A2, self).initialize(context)
+        self.field('field_b', False)
+        self.field('field_c', 'C')
 
     def value(self):
         v = super(A2, self).value()
@@ -39,3 +49,19 @@ class ElyGuiModelTest(unittest.TestCase):
 
         self.assertEqual(a.valueA(), 'Value A')
         self.assertEqual(a.value(), 'Class A + Class A1 + Class A2')
+
+        self.assertEqual(a.field_a, 'A')
+        self.assertEqual(a.field_b, False)
+        self.assertEqual(a.field_c, 'C')
+
+        a.field_a = 'AA'
+        a.field_b = True
+        a.field_c = 'CC'
+        self.assertEqual(a.field_a, 'AA')
+        self.assertEqual(a.field_b, True)
+        self.assertEqual(a.field_c, 'CC')
+
+        a.reset_fields()
+        self.assertEqual(a.field_a, 'A')
+        self.assertEqual(a.field_b, False)
+        self.assertEqual(a.field_c, 'C')
