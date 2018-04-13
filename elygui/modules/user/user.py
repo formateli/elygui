@@ -15,26 +15,51 @@ class User(Model):
 
         self.field('user_id')
         self.field('user_name')
+        self.field('password')
+        self.field('credentials', {})
         self.field('verified', False)
 
         context['model']['user'] = self
 
+    def verify_access(self, obj):
+        if self.user_id is None or not self.verified:
+            return False
+        if obj not in self.credentials:
+            return False
+        return self.credentials[obj]
+
+    def get_credentials(self, passwd):
+        # This function must be totally overriden.
+        # Following lines are for test purposes
+        # and for expose an example.
+        res = False
+        if passwd == '1111':
+            self.user_id = 0
+            self.user_name = 'Admin'
+            self.credentials['user.in_out'] = True
+            res = True
+        elif passwd == '9999':
+            self.user_id = 1
+            self.user_name = 'User'
+            self.credentials['user.in_out'] = False
+            res = True
+        return res
+
     def button_btn_credential_ok_clicked(self, context):
-        self.verified = True
-        calling = context['required_by'][0]
-        context['next'] = [
-                self._clear_entry_credential(),
-                ['HIDE_FORM'],
-                ['OPEN_FORM', calling],
-            ]
+        self.verified = self.get_credentials('1111')
+        if not self.verified:
+            self._clear_credentials(context)
+        else:
+            calling = context['required_by'][0]
+            if not self.verify_access(calling):
+                self._clear_credentials(context)
+            else:
+                self._clear_credentials(context)
+                context['next'].append(['OPEN_FORM', calling])
         return context
 
     def button_btn_credential_close_clicked(self, context):
-        self.verified = False
-        context['next'] = [
-                self._clear_entry_credential(),
-                ['HIDE_FORM']
-            ]
+        self._clear_credentials(context)
         return context
 
     def button_btn_0_clicked(self, context):
@@ -76,9 +101,13 @@ class User(Model):
             ]]
         return context
 
-    def _clear_entry_credential(self):
-        return [
-            'CONTROL', 
-            'user.entry_credential', 
-            'clear_text',
+    def _clear_credentials(self, context):
+        context['model']['user'].reset_fields()
+        context['next'] = [
+            [
+                'CONTROL', 
+                'user.entry_credential', 
+                'clear_text',
+            ],
+            ['HIDE_FORM'],
         ]
