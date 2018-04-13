@@ -2,7 +2,7 @@
 # The COPYRIGHT file at the top level of this repository
 # contains the full copyright notices and license terms.
 
-from elygui.model import Model, Field
+from elygui.model import Model
 import unittest
 
 
@@ -49,6 +49,10 @@ class ElyGuiModelTest(unittest.TestCase):
 
         self.assertEqual(a.valueA(), 'Value A')
         self.assertEqual(a.value(), 'Class A + Class A1 + Class A2')
+
+        with self.assertRaises(AttributeError):
+            a.field_x
+            a.field_x = 10
 
         self.assertEqual(a.field_a, 'A')
         self.assertEqual(a.field_b, False)

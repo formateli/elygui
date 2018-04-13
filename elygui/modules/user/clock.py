@@ -15,8 +15,7 @@ class Clock(Model):
         context['model']['clock'] = self
 
     def button_btn_clock_clicked(self, context):
-        ok = context['model']['user'].credential
-        print(ok)
+        ok = context['model']['user'].verified
         if ok:
             context['next'] = [['OPEN_FORM', 'user.in_out']]
         else:
@@ -25,12 +24,16 @@ class Clock(Model):
         return context
 
     def button_btn_in_clicked(self, context):
-        context['model']['user'].credential = False
+        context['model']['user'].verified = False
         context['next'] = [['CLOSE_FORM']]
         return context
 
     def button_btn_out_clicked(self, context):
+        print("OUT")
         context['model']['user'].credential = False
+        context['model']['user'].credential_X = False
+        print(context['model']['user'].credential_X)
+        print(context['model']['user'].credential)
         context['next'] = [['CLOSE_FORM']]
         return context
 

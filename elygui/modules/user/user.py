@@ -13,12 +13,14 @@ class User(Model):
     def initialize(self, context):
         super(User, self).initialize(context)
 
-        self.credential = False
+        self.field('user_id')
+        self.field('user_name')
+        self.field('verified', False)
 
         context['model']['user'] = self
 
     def button_btn_credential_ok_clicked(self, context):
-        self.credential = True
+        self.verified = True
         calling = context['required_by'][0]
         context['next'] = [
                 self._clear_entry_credential(),
@@ -28,7 +30,7 @@ class User(Model):
         return context
 
     def button_btn_credential_close_clicked(self, context):
-        self.credential = False
+        self.verified = False
         context['next'] = [
                 self._clear_entry_credential(),
                 ['HIDE_FORM']
