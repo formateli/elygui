@@ -65,6 +65,7 @@ class WindowForm(Gtk.Window):
         # TODO in config: self.set_keep_above(True)
         self.set_resizable(False)
         self.set_modal(True)
+        self.set_position(Gtk.WindowPosition.CENTER)
 
         #self.connect("delete-event", Gtk.main_quit)
         #self.show_all()
