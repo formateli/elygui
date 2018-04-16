@@ -114,6 +114,8 @@ class WindowForm(Gtk.Window):
         func = getattr(cls, 'button_' + name + '_clicked')
         res = func(self.gui_def._context)
 
+        widget.set_sensitive(False)
+
         for r in res['next']:
             if r[0] == 'SHUTDOWN':
                 Gtk.main_quit()
@@ -139,6 +141,8 @@ class WindowForm(Gtk.Window):
                 self.close()
             if r[0] == 'NOTHING':
                 pass
+
+        widget.set_sensitive(True)
 
     @staticmethod
     def defrag_name(name_to_defrag):
