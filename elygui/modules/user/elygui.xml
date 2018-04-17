@@ -14,7 +14,7 @@
     </Style>
   </Styles>
   <Forms>
-    <Form id="in_out">
+    <Form id="in_out" model="clock">
       <Title>IN / OUT</Title>
       <Childs>
         <VBox id="main_box">
@@ -36,7 +36,7 @@
         </VBox>
       </Childs>
     </Form>
-    <Form id="credential">
+    <Form id="credential" model="user">
       <Title>Credentials</Title>
       <Childs>
         <VBox id="main_box">
@@ -127,7 +127,7 @@
         </VBox>
       </Childs>
     </Form>
-    <Form id="main.main_form">
+    <Form id="main_form" model="main">
       <Extends>
         <Extend>
             <Path>/main_box/box_shutdown/main.btn_shutdown</Path>

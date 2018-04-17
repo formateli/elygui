@@ -19,9 +19,9 @@ class ElyGui(object):
             raise Exception("ElyGui: No config loaded.")
 
         self._forms = {}
-        self._context = {}
         self._model_classes = {}
-        
+
+        self.context = {}
         self.styles = {}
         self.styles_list = []
 
@@ -33,7 +33,7 @@ class ElyGui(object):
             if model is not None:
                 cls = Model.get(model)
                 if cls:
-                    obj = cls(self._context)
+                    obj = cls(self.context)
                     if obj:
                         self._model_classes[model] = obj
 
@@ -63,21 +63,25 @@ class ElyGui(object):
         if cfg.has_section(cfg, 'Forms') and \
                 cfg.has_section(cfg.Forms, 'Form'):
             for f in cfg.Forms.get_childs('Form'):
+                if not hasattr(f, 'id'):
+                    raise ValueError("'id' attribute must be set for 'Form'")
+                if not hasattr(f, 'model'):
+                    raise ValueError("'model' attribute must be set for 'Form'")
+                id_ = f.model + '.' + f.id
                 if cfg.has_section(f, 'Extends'):
-                    if f.id not in self._forms:
+                    if id_ not in self._forms:
                         raise Exception(
                             "Form '{0}' can not be extended. Not found.".format(
-                                f.id))
-                    form = self._forms[f.id]
+                                id_))
+                    form = self._forms[id_]
                     for ext in f.Extends.get_childs('Extend'):
                         form.extend(ext)
                 else:
-                    form_name = m.Name.value + '.' + f.id
-                    if form_name in self._forms:
+                    if id_ in self._forms:
                         raise Exception("Form '{0}' already exists.".format(
-                            form_name))
-                    form = Form(m.Name.value, f)
-                    self._forms[m.Name.value + '.' + f.id] = form
+                            f.id))
+                    form = Form(f)
+                    self._forms[id_] = form
 
     def _get_styles(self, styles):
         for st in styles.get_childs('Style'):        
@@ -91,20 +95,32 @@ class ElyGui(object):
 
 
 class Container(object):
-    def __init__(self, module_name, con_def):
-        self.module_name = module_name
-        self.id = con_def.id
+    _ids = {}
+
+    def __init__(self, model_name, con_def):
+        if not hasattr(con_def, 'id'):
+            raise ValueError("id attribute must be set.")
+
+        if model_name is not None:
+            self.id = "{0}.{1}".format(model_name, con_def.id)
+            if self.id in self._ids:
+                raise Exception(
+                    "Form or Control with id '{0}' is already present.".format(
+                        self.id))
+            self._ids[self.id] = self.id
+        else:
+            self.id = con_def.id
         self.parent = None
         self.controls = []
         self.childs = {}
 
-    def add_childs(self, module_name, childs):
+    def add_childs(self, childs):
         if not childs:
             return
         for ch in childs:
-            self._add_child(module_name, ch)
+            self._add_child(ch)
 
-    def _add_child(self, module_name, child, place=-1):
+    def _add_child(self, child, place=-1):
         ctl_class = getattr(
             sys.modules[__name__],
             child._section_name)
@@ -112,7 +128,7 @@ class Container(object):
         model_name = None
         if Xml2ClassObject.has_section(child, 'model'):
             model_name = child.model
-        ctl = ctl_class(module_name, model_name, child)
+        ctl = ctl_class(model_name, child)
         ctl.parent = self
         if place == -1:
             self.controls.append(ctl)
@@ -121,8 +137,7 @@ class Container(object):
         self.childs[ctl.id] = ctl
 
         if Xml2ClassObject.has_section(child, 'Childs'):
-            ctl.add_childs(
-                module_name, child.Childs.get_childs())
+            ctl.add_childs(child.Childs.get_childs())
 
     def _remove_child(self, index):
         child = self.controls[index]
@@ -151,12 +166,13 @@ class Container(object):
 
 
 class Form(Container):
-    def __init__(self, module_name, form_def):
-        super(Form, self).__init__(module_name, form_def)
-        self.id = module_name + '.' + self.id
+    def __init__(self, form_def):
+        if not hasattr(form_def, 'model'):
+            raise ValueError("model must be set for Form '{0}'".format(
+                form_def.id))
+        super(Form, self).__init__(form_def.model, form_def)
         self.title = self._get_field_value(form_def, 'Title', 'NO TITLE')
-        self.add_childs(
-            module_name, form_def.Childs.get_childs())
+        self.add_childs(form_def.Childs.get_childs())
 
     def extend(self, ext_def):
         action = ext_def.Action.value
@@ -166,17 +182,16 @@ class Form(Container):
         if action == 'remove':
             ctl.parent._remove_child(place_index)
         elif action == 'place':
-            ctl._add_child(
-                self.module_name, ext_def.Controls.get_childs()[0])
+            ctl._add_child(ext_def.Controls.get_childs()[0])
         elif action in ['place_after', 'place_before']:
             if action == 'place_after':
                 place_index += 1
             ctl.parent._add_child(
-                self.module_name, ext_def.Controls.get_childs()[0],
+                ext_def.Controls.get_childs()[0],
                 place=place_index)
         elif action == 'replace':
             ctl.parent._add_child(
-                self.module_name, ext_def.Controls.get_childs()[0],
+                ext_def.Controls.get_childs()[0],
                 place=place_index + 1)
             ctl.parent._remove_child(place_index)
         elif action == 'modify':
@@ -225,18 +240,13 @@ class Style(object):
 
 
 class Control(Container):
-    def __init__(self, type_, module_name, model_name, control_def):
-        super(Control, self).__init__(module_name, control_def)
-        if model_name is not None:
-            self.id = model_name + '.' + self.id
+    def __init__(self, type_, model_name, control_def):
+        super(Control, self).__init__(model_name, control_def)
         self.type_ = type_
         self.model_name = model_name
         self.style = self._get_field_value(control_def, 'Style') 
         self.height = self._get_field_value(control_def, 'Height') 
         self.width = self._get_field_value(control_def, 'Width') 
-
-    def get_full_name(self):
-        return self.module_name + '.' + self.id
 
     def get_index(self):
         i = 0
@@ -247,22 +257,22 @@ class Control(Container):
     
 
 class HBox(Control):
-    def __init__(self, module_name, model, control_def):
-        super(HBox, self).__init__('HBox', module_name, model, control_def)
+    def __init__(self, model, control_def):
+        super(HBox, self).__init__('HBox', model, control_def)
 
 
 class VBox(Control):
-    def __init__(self, module_name, model, control_def):
-        super(VBox, self).__init__('VBox', module_name, model, control_def)
+    def __init__(self, model, control_def):
+        super(VBox, self).__init__('VBox', model, control_def)
 
 
 class Button(Control):
-    def __init__(self, module_name, model, control_def):
-        super(Button, self).__init__('Button', module_name, model, control_def)
+    def __init__(self, model, control_def):
+        super(Button, self).__init__('Button', model, control_def)
         self.label = self._get_field_value(control_def, 'Label')
 
 
 class Entry(Control):
-    def __init__(self, module_name, model, control_def):
-        super(Entry, self).__init__('Entry', module_name, model, control_def)
+    def __init__(self, model, control_def):
+        super(Entry, self).__init__('Entry', model, control_def)
         self.label = self._get_field_value(control_def, 'Label')

@@ -50,8 +50,10 @@ class ElyGuiModelTest(unittest.TestCase):
         self.assertEqual(a.valueA(), 'Value A')
         self.assertEqual(a.value(), 'Class A + Class A1 + Class A2')
 
+        self.assertFalse(hasattr(a, 'field_x'))
         with self.assertRaises(AttributeError):
             a.field_x
+        with self.assertRaises(AttributeError):
             a.field_x = 10
 
         self.assertEqual(a.field_a, 'A')

@@ -18,6 +18,7 @@ class User(Model):
         self.field('password')
         self.field('credentials', {})
         self.field('verified', False)
+        self.field('paranoic', True)
 
         context['model']['user'] = self
 
@@ -25,7 +26,10 @@ class User(Model):
         if self.user_id is None or not self.verified:
             return False
         if obj not in self.credentials:
-            return False
+            if self.paranoic:
+                return False
+            else:
+                return True
         return self.credentials[obj]
 
     def get_credentials(self, passwd):
@@ -36,16 +40,16 @@ class User(Model):
         if passwd == '1111':
             self.user_id = 0
             self.user_name = 'Admin'
-            self.credentials['user.in_out'] = True
+            self.credentials['clock.in_out'] = True
             res = True
         elif passwd == '9999':
             self.user_id = 1
             self.user_name = 'User'
-            self.credentials['user.in_out'] = False
+            self.credentials['clock.in_out'] = False
             res = True
         return res
 
-    def button_btn_credential_ok_clicked(self, context):
+    def button_btn_credential_ok_clicked(self, form, context):
         self.verified = self.get_credentials('1111')
         if not self.verified:
             self._clear_credentials(context)
@@ -58,38 +62,38 @@ class User(Model):
                 context['next'].append(['OPEN_FORM', calling])
         return context
 
-    def button_btn_credential_close_clicked(self, context):
+    def button_btn_credential_close_clicked(self, form, context):
         self._clear_credentials(context)
         return context
 
-    def button_btn_0_clicked(self, context):
+    def button_btn_0_clicked(self, form, context):
         return self._pad_number_clicked(0, context)
 
-    def button_btn_1_clicked(self, context):
+    def button_btn_1_clicked(self, form, context):
         return self._pad_number_clicked(1, context)
 
-    def button_btn_2_clicked(self, context):
+    def button_btn_2_clicked(self, form, context):
         return self._pad_number_clicked(2, context)
 
-    def button_btn_3_clicked(self, context):
+    def button_btn_3_clicked(self, form, context):
         return self._pad_number_clicked(3, context)
 
-    def button_btn_4_clicked(self, context):
+    def button_btn_4_clicked(self, form, context):
         return self._pad_number_clicked(4, context)
 
-    def button_btn_5_clicked(self, context):
+    def button_btn_5_clicked(self, form, context):
         return self._pad_number_clicked(5, context)
 
-    def button_btn_6_clicked(self, context):
+    def button_btn_6_clicked(self, form, context):
         return self._pad_number_clicked(6, context)
         
-    def button_btn_7_clicked(self, context):
+    def button_btn_7_clicked(self, form, context):
         return self._pad_number_clicked(7, context)
 
-    def button_btn_8_clicked(self, context):
+    def button_btn_8_clicked(self, form, context):
         return self._pad_number_clicked(8, context)
 
-    def button_btn_9_clicked(self, context):
+    def button_btn_9_clicked(self, form, context):
         return self._pad_number_clicked(9, context)
 
     def _pad_number_clicked(self, number, context):

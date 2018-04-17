@@ -15,7 +15,6 @@ class Main(Model):
         context['model'] = {}
         context['next'] = None
 
-    def button_btn_shutdown_clicked(self, context):
+    def button_btn_shutdown_clicked(self, form, context):
         context['next'] = [['SHUTDOWN']]
         return context
-

@@ -62,13 +62,9 @@ class WindowForm(Gtk.Window):
 
         self.set_decorated(False)
         self.set_destroy_with_parent(True)
-        # TODO in config: self.set_keep_above(True)
         self.set_resizable(False)
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER)
-
-        #self.connect("delete-event", Gtk.main_quit)
-        #self.show_all()
 
     def get_widget(self, wg_def):
         wg = None
@@ -88,8 +84,7 @@ class WindowForm(Gtk.Window):
             wg = Gtk.Entry()
 
         if wg:
-            wg.set_property('name',
-                wg_def.get_full_name())
+            wg.set_property('name', wg_def.id)
 
             ctx = wg.get_style_context()
             if wg_def.style:
@@ -103,18 +98,18 @@ class WindowForm(Gtk.Window):
 
         return wg
 
-    def on_button_clicked(self, widget):
-        module, model, name = self.defrag_name(
-            widget.get_property('name'))
+    def on_button_clicked(self, button):
+        model, name = self.defrag_name(
+            button.get_property('name'))
 
         cls = self.gui_def.get_model_class(model)
         if cls is None:
             raise Exception(
                 "Class for model '{0}' not found.".format(model))
         func = getattr(cls, 'button_' + name + '_clicked')
-        res = func(self.gui_def._context)
+        res = func(self, self.gui_def.context)
 
-        widget.set_sensitive(False)
+        button.set_sensitive(False)
 
         for r in res['next']:
             if r[0] == 'SHUTDOWN':
@@ -132,6 +127,8 @@ class WindowForm(Gtk.Window):
                     txt = ctl.get_text()
                     txt += r[3]
                     ctl.set_text(txt)
+                elif r[2] == 'set_text':
+                    ctl.set_text(r[3])
                 elif r[2] == 'clear_text':
                     ctl.set_text('')
             if r[0] == 'HIDE_FORM':
@@ -142,24 +139,16 @@ class WindowForm(Gtk.Window):
             if r[0] == 'NOTHING':
                 pass
 
-        widget.set_sensitive(True)
+        button.set_sensitive(True)
 
     @staticmethod
     def defrag_name(name_to_defrag):
-        names = name_to_defrag.split('.')
-        i = 0
-        module = None
-        model = None
-        name = None
-        for m in names:
-            if i == 0:
-                module = names[0]
-            elif i == len(names) - 1:
-                name = names[i]
-            else:
-                if model is None:
-                    model = names[i]
-                else:
-                    model += '.' + names[i]
-            i += 1
-        return module, model, name
+        n = name_to_defrag.rfind('.')
+        if n < 0:
+            raise ValueError(
+                "Invalid model/id value '{0}'".format(name_to_defrag))
+
+        model = name_to_defrag[:n]
+        id_ = name_to_defrag[n + 1:]
+
+        return model, id_
