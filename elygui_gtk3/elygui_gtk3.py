@@ -44,8 +44,9 @@ class WindowForm(Gtk.Window):
 
     def __init__(self, gui_def, form_id):
         self.gui_def = gui_def
-        self.controls = {}
         self.id = form_id
+
+        self._controls = {}
 
         frm = gui_def.get_form(form_id)
 
@@ -56,8 +57,7 @@ class WindowForm(Gtk.Window):
         Gtk.Window.__init__(self, title=frm.title)
 
         for ctl in frm.controls:
-            wg = self.get_widget(ctl)
-            self.controls[ctl.id] = wg
+            wg = self._get_widget(ctl)
             self.add(wg)
 
         self.set_decorated(False)
@@ -66,7 +66,14 @@ class WindowForm(Gtk.Window):
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER)
 
-    def get_widget(self, wg_def):
+    def get_control(self, ctl_name):
+        if ctl_name in self._controls:
+            return self._controls[ctl_name]
+        raise ValueError(
+            "Control '{0}' not found in Form '{1}'".format(
+                ctl_name, self.id))
+
+    def _get_widget(self, wg_def):
         wg = None
         if wg_def.type_ in ['HBox', 'VBox']:
             if wg_def.type_ == 'HBox':
@@ -74,7 +81,7 @@ class WindowForm(Gtk.Window):
             else:
                 wg = Gtk.VBox(spacing=6)
             for ctl in wg_def.controls:
-                ch = self.get_widget(ctl)
+                ch = self._get_widget(ctl)
                 if ch:
                     wg.pack_start(ch, True, True, 0)
         if wg_def.type_ == 'Button':
@@ -94,7 +101,7 @@ class WindowForm(Gtk.Window):
                 wg.set_property("height-request", float(wg_def.height))
             if wg_def.width is not None:
                 wg.set_property("width-request", float(wg_def.width))
-            self.controls[wg_def.id] = wg
+            self._controls[wg_def.id] = wg
 
         return wg
 
@@ -107,7 +114,10 @@ class WindowForm(Gtk.Window):
             raise Exception(
                 "Class for model '{0}' not found.".format(model))
         func = getattr(cls, 'button_' + name + '_clicked')
-        res = func(self, self.gui_def.context)
+        res = func(self, button, self.gui_def.context)
+
+        if res is None:
+            return
 
         button.set_sensitive(False)
 
@@ -121,16 +131,6 @@ class WindowForm(Gtk.Window):
                     frm = WindowForm(self.gui_def, r[1])
                 frm.set_transient_for(self)
                 frm.show_all()
-            if r[0] == 'CONTROL':
-                ctl = self.controls[r[1]]
-                if r[2] == 'append_text':
-                    txt = ctl.get_text()
-                    txt += r[3]
-                    ctl.set_text(txt)
-                elif r[2] == 'set_text':
-                    ctl.set_text(r[3])
-                elif r[2] == 'clear_text':
-                    ctl.set_text('')
             if r[0] == 'HIDE_FORM':
                 self.hide_forms[self.id] = self
                 self.hide()

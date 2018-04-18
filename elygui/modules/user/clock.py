@@ -14,28 +14,28 @@ class Clock(Model):
         super(Clock, self).initialize(context)
         context['model']['clock'] = self
 
-    def button_btn_clock_clicked(self, form, context):
-        user = context['model']['user']
+    def button_btn_clock_clicked(self, frm, ctl, ctx):
+        user = ctx['model']['user']
         if user.verified:
-            context['next'] = [['OPEN_FORM', 'clock.in_out']]
+            ctx['next'] = [['OPEN_FORM', 'clock.in_out']]
         else:
-            context['next'] = [['OPEN_FORM', 'user.credential']]
-            context['required_by'] = ['clock.in_out']
-        return context
+            ctx['next'] = [['OPEN_FORM', 'user.credential']]
+            ctx['required_by'] = ['clock.in_out']
+        return ctx
 
-    def button_btn_in_clicked(self, form, context):
-        user = context['model']['user']
+    def button_btn_in_clicked(self, frm, ctl, ctx):
+        user = ctx['model']['user']
         res = self._verify('in', user)
 
-        self._close_with_reset(context)
-        return context
+        self._close_with_reset(ctx)
+        return ctx
 
-    def button_btn_out_clicked(self, form, context):
-        user = context['model']['user']
+    def button_btn_out_clicked(self, frm, ctl, ctx):
+        user = ctx['model']['user']
         res = self._verify('out', user)
 
-        self._close_with_reset(context)
-        return context
+        self._close_with_reset(ctx)
+        return ctx
 
     def _verify(self, type_, user):
         if type_ == 'in' and user.user_id == 0:
