@@ -7,6 +7,9 @@
     <Module>
       <Name>user</Name>
     </Module>
+    <Module>
+      <Name>order</Name>
+    </Module>
   </Modules>
   <pjjob>
     <Address>localhost</Address>

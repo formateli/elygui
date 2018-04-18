@@ -9,7 +9,6 @@ from gi.repository import Gtk, Gdk
 
 class ElyGuiGtk3(object):
     def __init__(self, gui_def):
-
         css = self._get_css(gui_def)
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(css.encode('utf8'))
