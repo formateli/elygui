@@ -66,6 +66,8 @@ class WindowForm(Gtk.Window):
         self.set_modal(True)
         self.set_position(Gtk.WindowPosition.CENTER)
 
+        self._run_signal(self.id, 'form', 'loaded', frm=self)
+
     def get_control(self, ctl_name):
         if ctl_name in self._controls:
             return self._controls[ctl_name]
@@ -106,15 +108,10 @@ class WindowForm(Gtk.Window):
         return wg
 
     def on_button_clicked(self, button):
-        model, name = self.defrag_name(
-            button.get_property('name'))
-
-        cls = self.gui_def.get_model_class(model)
-        if cls is None:
-            raise Exception(
-                "Class for model '{0}' not found.".format(model))
-        func = getattr(cls, 'button_' + name + '_clicked')
-        res = func(self, button, self.gui_def.context)
+        res = self._run_signal(
+            button.get_property('name'),
+            'button', 'clicked',
+            frm=self, ctl=button)
 
         if res is None:
             return
@@ -140,6 +137,21 @@ class WindowForm(Gtk.Window):
                 pass
 
         button.set_sensitive(True)
+
+    def _run_signal(self, id_, prefix, sufix, **kwargs):
+        model, name = self.defrag_name(id_)
+        cls = self.gui_def.get_model_class(model)
+        if cls is None:
+            raise Exception(
+                "Class for model '{0}' not found.".format(model))
+        res = None
+        attr = "{0}_{1}_{2}".format(prefix, name, sufix)
+        if hasattr(cls, attr):
+            func = getattr(cls, attr)
+            res = func(self.gui_def.context, **kwargs)
+        else:
+            print("Function '{0}' not found.".format(attr))
+        return res
 
     @staticmethod
     def defrag_name(name_to_defrag):

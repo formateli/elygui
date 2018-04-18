@@ -24,11 +24,11 @@
             <HBox id="box_buttons">
               <Height>150</Height>
               <Childs>
-                <Button id="btn_in" model="clock">
-                  <Label>IN</Label>
+                <Button id="btn_in_out" model="clock">
+                  <Label>IN / OUT</Label>
                 </Button>
-                <Button id="btn_out" model="clock">
-                  <Label>OUT</Label>
+                <Button id="btn_cancel" model="clock">
+                  <Label>CANCEL</Label>
                 </Button>
               </Childs>
             </HBox>

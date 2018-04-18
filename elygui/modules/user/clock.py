@@ -14,7 +14,7 @@ class Clock(Model):
         super(Clock, self).initialize(context)
         context['model']['clock'] = self
 
-    def button_btn_clock_clicked(self, frm, ctl, ctx):
+    def button_btn_clock_clicked(self, ctx, frm, ctl):
         user = ctx['model']['user']
         if user.verified:
             ctx['next'] = [['OPEN_FORM', 'clock.in_out']]
@@ -23,17 +23,24 @@ class Clock(Model):
             ctx['required_by'] = ['clock.in_out']
         return ctx
 
-    def button_btn_in_clicked(self, frm, ctl, ctx):
+    def get_user_state(self, user):
+        return 'IN'
+
+    def form_in_out_loaded(self, ctx, frm):
+        user = ctx['model']['user']
+        btn = frm.get_control('clock.btn_in_out')
+        state = self.get_user_state(user)
+        btn.set_label('IN')
+        if state == 'IN':
+            btn.set_label('OUT')
+
+    def button_btn_in_out_clicked(self, ctx, frm, ctl):
         user = ctx['model']['user']
         res = self._verify('in', user)
-
         self._close_with_reset(ctx)
         return ctx
 
-    def button_btn_out_clicked(self, frm, ctl, ctx):
-        user = ctx['model']['user']
-        res = self._verify('out', user)
-
+    def button_btn_cancel_clicked(self, ctx, frm, ctl):
         self._close_with_reset(ctx)
         return ctx
 

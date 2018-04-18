@@ -50,57 +50,62 @@ class User(Model):
             res = True
         return res
 
-    def button_btn_credential_ok_clicked(self, frm, ctl, ctx):
+    def button_btn_credential_ok_clicked(self, ctx, frm, ctl):
         entry = frm.get_control('user.entry_credential')
 
         self.verified = self.get_credentials(entry.get_text())
         if not self.verified:
-            self._clear_credentials(ctx)
+            self._clear_credentials(frm, ctx)
         else:
             calling = ctx['required_by'][0]
             if not self.verify_access(calling):
-                self._clear_credentials(ctx)
+                self._clear_credentials(frm, ctx)
             else:
-                self._clear_credentials(ctx)
+                self._clear_credentials(frm, ctx)
                 ctx['next'].append(['OPEN_FORM', calling])
         return ctx
 
-    def button_btn_credential_close_clicked(self,  frm, ctl, ctx):
-        self._clear_credentials(ctx)
+    def button_btn_credential_close_clicked(self, ctx, frm, ctl):
+        self._clear_credentials(frm, ctx)
         return ctx
 
-    def button_btn_clear_all_clicked(self,  frm, ctl, ctx):
+    def button_btn_clear_all_clicked(self, ctx, frm, ctl):
         entry = frm.get_control('user.entry_credential')
         entry.set_text('')
 
-    def button_btn_0_clicked(self, frm, ctl, ctx):
+    def button_btn_clear_clicked(self, ctx, frm, ctl):
+        entry = frm.get_control('user.entry_credential')
+        txt = entry.get_text()
+        entry.set_text(txt[:len(txt) - 1])
+
+    def button_btn_0_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(0, frm, ctl, ctx)
 
-    def button_btn_1_clicked(self, frm, ctl, ctx):
+    def button_btn_1_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(1, frm, ctl, ctx)
 
-    def button_btn_2_clicked(self, frm, ctl, ctx):
+    def button_btn_2_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(2, frm, ctl, ctx)
 
-    def button_btn_3_clicked(self, frm, ctl, ctx):
+    def button_btn_3_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(3, frm, ctl, ctx)
 
-    def button_btn_4_clicked(self, frm, ctl, ctx):
+    def button_btn_4_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(4, frm, ctl, ctx)
 
-    def button_btn_5_clicked(self, frm, ctl, ctx):
+    def button_btn_5_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(5, frm, ctl, ctx)
 
-    def button_btn_6_clicked(self, frm, ctl, ctx):
+    def button_btn_6_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(6, frm, ctl, ctx)
         
-    def button_btn_7_clicked(self, frm, ctl, ctx):
+    def button_btn_7_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(7, frm, ctl, ctx)
 
-    def button_btn_8_clicked(self, frm, ctl, ctx):
+    def button_btn_8_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(8, frm, ctl, ctx)
 
-    def button_btn_9_clicked(self, frm, ctl, ctx):
+    def button_btn_9_clicked(self, ctx, frm, ctl):
         return self._pad_number_clicked(9, frm, ctl, ctx)
 
     def _pad_number_clicked(self, number, frm, ctl, ctx):
@@ -109,13 +114,7 @@ class User(Model):
         txt += str(number)
         entry.set_text(txt)
 
-    def _clear_credentials(self, context):
-        context['model']['user'].reset_fields()
-        context['next'] = [
-            [
-                'CONTROL', 
-                'user.entry_credential', 
-                'clear_text',
-            ],
-            ['HIDE_FORM'],
-        ]
+    def _clear_credentials(self, frm, ctx):
+        self.button_btn_clear_all_clicked(ctx, frm, None)
+        ctx['model']['user'].reset_fields()
+        ctx['next'] = [['HIDE_FORM']]
