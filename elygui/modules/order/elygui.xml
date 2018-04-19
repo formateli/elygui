@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<elygui>
+  <Module>
+    <Name>order</Name>
+    <Author>Fredy Ramirez</Author>
+    <Version>1.0.0</Version>
+  </Module>
+
+  <Forms>
+    <Form id="order_form" model="order">
+      <Title>ORDER</Title>
+      <Childs>
+        <VBox id="main_box">
+          <Height>150</Height>
+          <Width>500</Width>
+          <Childs>
+            <HBox id="box_buttons">
+              <Height>150</Height>
+              <Childs>
+                <Button id="btn_in_out" model="order">
+                  <Label>IN / OUT</Label>
+                </Button>
+                <Button id="btn_cancel" model="order">
+                  <Label>CANCEL</Label>
+                </Button>
+              </Childs>
+            </HBox>
+          </Childs>
+        </VBox>
+      </Childs>
+    </Form>
+    <Form id="main_form" model="main">
+      <Extends>
+        <Extend>
+            <Path>/main_box/box_shutdown</Path>
+            <Action>place_before</Action>
+            <Controls>
+              <HBox id="box_order">
+                <Height>150</Height>
+                <Childs>
+                  <Button id="btn_order" model="order">
+                    <Label>ORDER</Label>
+                  </Button>
+                </Childs>
+              </HBox>
+            </Controls>
+        </Extend>
+      </Extends>
+    </Form>
+  </Forms>
+</elygui>

@@ -132,8 +132,6 @@ class WindowForm(Gtk.Window):
                 self.hide()
             if r[0] == 'CLOSE_FORM':
                 self.close()
-            if r[0] == 'NOTHING':
-                pass
 
         button.set_sensitive(True)
 
